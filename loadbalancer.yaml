@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-service-lb    
+  labels:
+    app: vault
+spec:
+  ports:
+  - protocol: TCP
+    port: 8201
+    targetPort: 8200
+    name: http  
+  selector:
+    app: vault    
+  type: LoadBalancer
