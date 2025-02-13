@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp
+  labels:
+    app: demoapp-
+spec:
+  selector:
+    matchLabels:
+      app: demoapp      
+  replicas: 1
+  template:
+    metadata:      
+      labels:
+        app: demoapp        
+    spec:
+      volumes:     
+      - name: envconsul-config
+        configMap:
+          name: envconsul-config
+      - name: env-vars-volume
+        emptyDir: {}
+
+      initContainers:
+      - name: envconsul-inject
+        image: hashicorp/envconsul:0.13
+        command: ["sh", "-c", "envconsul -config=/etc/envconsul/envconsul-env1.hcl -secret secret/demoapp/env1 env | grep secret_ > /tmp/env_vars.txt"]
+        volumeMounts:
+        - name: envconsul-config
+          mountPath: /etc/envconsul
+        - name: env-vars-volume
+          mountPath: /tmp        
+
+      containers:
+      - name: demoapp
+        imagePullPolicy: Always
+        image: your-acr-name.azurecr.io/demoapp:latest        
+        volumeMounts:       
+        - name: env-vars-volume
+          mountPath: /tmp
+
+         
+
+ 
